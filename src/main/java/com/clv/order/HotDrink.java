@@ -1,13 +1,13 @@
 package com.clv.order;
 
-public class HotDrinkOrder extends Order {
+class HotDrink extends Drink {
 
     private final SugarQuantity sugarQuantity;
     private final boolean isExtraHot;
 
 
-    public HotDrinkOrder(HotDrinkType drinkType, SugarQuantity sugarQuantity, boolean isExtraHot, int money) {
-        super(drinkType, money);
+    HotDrink(DrinkType drinkType, SugarQuantity sugarQuantity, boolean isExtraHot) {
+        super(drinkType);
         this.sugarQuantity = sugarQuantity != null ? sugarQuantity : SugarQuantity.ZERO;
         this.isExtraHot = isExtraHot;
     }
@@ -21,4 +21,5 @@ public class HotDrinkOrder extends Order {
     public boolean isExtraHot() {
         return isExtraHot;
     }
+
 }

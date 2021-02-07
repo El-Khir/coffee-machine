@@ -2,7 +2,9 @@ package com.clv;
 
 import com.clv.checker.BeverageQuantityChecker;
 import com.clv.email.EmailNotifier;
-import com.clv.order.HotDrinkOrder;
+import com.clv.order.Drink;
+import com.clv.order.DrinkFactory;
+import com.clv.order.DrinkType;
 import com.clv.order.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +15,7 @@ import com.clv.protocolmessage.ProtocolMessageBuilder;
 import com.clv.repository.Purchase;
 import com.clv.repository.PurchaseRepository;
 
-import static com.clv.order.HotDrinkType.TEA;
+import static com.clv.order.DrinkType.TEA;
 import static com.clv.order.SugarQuantity.ONE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CoffeeMachineProcessorTest {
+
+    private final DrinkFactory drinkFactory = new DrinkFactory();
 
     @Mock
     private ProtocolMessageBuilder protocolMessageBuilder;
@@ -37,11 +41,12 @@ public class CoffeeMachineProcessorTest {
     @Test
     public void givenEnoughMoneyOrderAndEnoughBeverage_whenProcess_thenReturnExpectedOrderMessageAndPurchaseWasSavedAndNotificationNotSent() {
 
+        Drink drink = drinkFactory.createDrink(TEA, ONE, false);
+        Order order = new Order(drink, TEA.getPrice());
 
-        Order order = new HotDrinkOrder(TEA, ONE, false, TEA.getPrice());
         String expectedMessage = "T:1:0";
         when(beverageQuantityChecker.isEmpty(TEA.toString())).thenReturn(false);
-        when(protocolMessageBuilder.buildOrderMessage(order.getDrink(), order.getSugarQuantity(), order.isExtraHot()))
+        when(protocolMessageBuilder.buildOrderMessage(order.getDrink()))
                 .thenReturn(expectedMessage);
 
         String actualMessage = coffeeMachineProcessor.processOrder(order);
@@ -54,7 +59,8 @@ public class CoffeeMachineProcessorTest {
     @Test
     public void givenNotEnoughMoneyOrderAndEnoughBeverage_whenProcess_thenReturnExpectedInfoMessageAndPurchaseWasNotSavedAndNotificationsNotSent() {
 
-        Order order = new HotDrinkOrder(TEA, ONE, false, TEA.getPrice() - 1);
+        Drink drink = drinkFactory.createDrink(TEA, ONE, false);
+        Order order = new Order(drink, TEA.getPrice() - 1);
         String missingMoneyMessage = String.format(CoffeeMachineProcessor.MISSING_MONEY_MESSAGE_TEMPLATE, 1);
         String expectedMessage = "M:"+missingMoneyMessage;
 
@@ -72,7 +78,8 @@ public class CoffeeMachineProcessorTest {
     @Test
     public void givenEnoughMoneyOrderAndNotEnoughBeverage_whenProcess_thenReturnExpectedInfoMessageAndPurchaseWasNotSavedAndNotificationSent() {
 
-        Order order = new HotDrinkOrder(TEA, ONE, false, TEA.getPrice());
+        Drink drink = drinkFactory.createDrink(TEA, ONE, false);
+        Order order = new Order(drink, TEA.getPrice());
         String expectedMessage = "M:"+ CoffeeMachineProcessor.SHORTAGE_MESSAGE;
 
         when(beverageQuantityChecker.isEmpty(TEA.toString())).thenReturn(true);
@@ -90,7 +97,9 @@ public class CoffeeMachineProcessorTest {
     @Test
     public void givenNotEnoughMoneyOrderAndNotEnoughBeverage_whenProcess_thenReturnExpectedInfoMessageAndPurchaseWasNotSavedAndNotificationSent() {
 
-        Order order = new HotDrinkOrder(TEA, ONE, false, TEA.getPrice() - 1);
+        Drink drink = drinkFactory.createDrink(TEA, ONE, false);
+
+        Order order = new Order(drink, TEA.getPrice() - 1);
         String expectedMessage = "M:"+ CoffeeMachineProcessor.SHORTAGE_MESSAGE;
 
         when(beverageQuantityChecker.isEmpty(TEA.toString())).thenReturn(true);

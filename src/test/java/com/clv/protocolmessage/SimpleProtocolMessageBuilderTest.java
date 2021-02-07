@@ -1,29 +1,32 @@
 package com.clv.protocolmessage;
 
-import com.clv.order.*;
+import com.clv.order.Drink;
+import com.clv.order.DrinkFactory;
+import com.clv.order.DrinkType;
+import com.clv.order.SugarQuantity;
 import org.junit.jupiter.api.Test;
 
-import static com.clv.order.CoolDrinkType.ORANGE_JUICE;
-import static com.clv.order.HotDrinkType.*;
-import static com.clv.order.HotDrinkType.TEA;
+import static com.clv.order.DrinkType.*;
 import static com.clv.order.SugarQuantity.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleProtocolMessageBuilderTest {
 
     private final ProtocolMessageBuilder spmb = new SimpleProtocolMessageBuilder();
+    private final DrinkFactory drinkFactory = new DrinkFactory();
 
     @Test
     public void givenTeaWithOneSugar_whenBuildOrderMessage_thenReturnTeaCode_delimiter_oneSugar_delimiter_stickCode() {
 
-        DrinkType tea = TEA;
-        SugarQuantity oneSugar = ONE;
+        DrinkType drinkType = TEA;
+        SugarQuantity sugarQuantity = ONE;
+        Drink drink = drinkFactory.createDrink(drinkType, sugarQuantity, false);
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                tea.getCode(),
-                String.valueOf(oneSugar.getIntValue()),
+                drinkType.getCode(),
+                String.valueOf(sugarQuantity.getIntValue()),
                 SimpleProtocolMessageBuilder.STICK_CODE);
 
-        String protocolMessage = spmb.buildOrderMessage(tea, oneSugar, false);
+        String protocolMessage = spmb.buildOrderMessage(drink);
 
         assertEquals(expectedMessage, protocolMessage);
     }
@@ -31,12 +34,14 @@ public class SimpleProtocolMessageBuilderTest {
     @Test
     public void givenChocolateWithoutSugar_whenBuildOrderMessage_thenReturnChocolateCode_delimiter_delimiter() {
 
-        DrinkType chocolate = CHOCOLATE;
+        DrinkType drinkType = CHOCOLATE;
+        Drink drink = drinkFactory.createDrink(drinkType);
+
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                chocolate.getCode(),
+                drinkType.getCode(),
                 SimpleProtocolMessageBuilder.DELIMITER);
 
-        String protocolMessage = spmb.buildOrderMessage(chocolate, ZERO, false);
+        String protocolMessage = spmb.buildOrderMessage(drink);
 
         assertEquals(expectedMessage, protocolMessage);
     }
@@ -44,14 +49,15 @@ public class SimpleProtocolMessageBuilderTest {
     @Test
     public void givenCoffeeWithTwoSugar_whenBuildOrderMessage_thenReturnCoffeeCode_delimiter_twoSugar_delimiter_stickCode() {
 
-        DrinkType coffee = COFFEE;
-        SugarQuantity twoSugar = TWO;
+        DrinkType drinkType = COFFEE;
+        SugarQuantity sugarQuantity = TWO;
+        Drink drink = drinkFactory.createDrink(drinkType, sugarQuantity, false);
 
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                coffee.getCode(),
-                String.valueOf(twoSugar.getIntValue()),
+                drinkType.getCode(),
+                String.valueOf(sugarQuantity.getIntValue()),
                 SimpleProtocolMessageBuilder.STICK_CODE);
-        String protocolMessage = spmb.buildOrderMessage(coffee, twoSugar, false);
+        String protocolMessage = spmb.buildOrderMessage(drink);
         assertEquals(expectedMessage, protocolMessage);
 
     }
@@ -69,15 +75,19 @@ public class SimpleProtocolMessageBuilderTest {
         assertEquals(expectedMessage, protocolMessage);
 
     }
+
     @Test
     public void givenExtraHotCoffeeWithoutSugar_whenBuildOrderMessage_thenReturnCoffeeCode_extraHotCode_delimiter_delimiter() {
 
-        DrinkType coffee = COFFEE;
+        DrinkType drinkType = COFFEE;
+        SugarQuantity sugarQuantity = ZERO;
+        Drink drink = drinkFactory.createDrink(drinkType, sugarQuantity, true);
+
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                coffee.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
+                drinkType.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
                 SimpleProtocolMessageBuilder.DELIMITER);
 
-        String protocolMessage = spmb.buildOrderMessage(coffee, ZERO, true);
+        String protocolMessage = spmb.buildOrderMessage(drink);
 
         assertEquals(expectedMessage, protocolMessage);
     }
@@ -85,28 +95,34 @@ public class SimpleProtocolMessageBuilderTest {
     @Test
     public void givenExtraHotChocolateWithOneSugar_whenBuildOrderMessage_thenReturnChocolateCode_extraHotCode_delimiter_oneSugar_delimiter_stickCode() {
 
-        DrinkType chocolate = CHOCOLATE;
-        SugarQuantity one = ONE;
+        DrinkType drinkType = CHOCOLATE;
+        SugarQuantity sugarQuantity = ONE;
+        Drink drink = drinkFactory.createDrink(drinkType, sugarQuantity, true);
+
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                chocolate.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
-                String.valueOf(one.getIntValue()),
+                drinkType.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
+                String.valueOf(sugarQuantity.getIntValue()),
                 SimpleProtocolMessageBuilder.STICK_CODE);
 
-        String protocolMessage = spmb.buildOrderMessage(chocolate, one, true);
+        String protocolMessage = spmb.buildOrderMessage(drink);
         assertEquals(expectedMessage, protocolMessage);
 
     }
 
     @Test
-    public void givenExtraHotTeaWithTwoSugarOrderAndEnoughMoney_whenBuildOrderMessage_thenReturnTeaCode_extraHotCode_delimiter_twoSugar_delimiter_stickCode() {
+    public void givenExtraHotTeaWithTwoSugarOrder_whenBuildOrderMessage_thenReturnTeaCode_extraHotCode_delimiter_twoSugar_delimiter_stickCode() {
 
-        HotDrinkType tea = TEA;
-        SugarQuantity two = TWO;
+
+        DrinkType drinkType = TEA;
+        SugarQuantity sugarQuantity = TWO;
+        Drink drink = drinkFactory.createDrink(drinkType, sugarQuantity, true);
+
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                tea.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
-                String.valueOf(two.getIntValue()),
+                drinkType.getCode() + SimpleProtocolMessageBuilder.EXTRA_HOT_CODE,
+                String.valueOf(sugarQuantity.getIntValue()),
                 SimpleProtocolMessageBuilder.STICK_CODE);
-        String protocolMessage = spmb.buildOrderMessage(tea, two, true);
+
+        String protocolMessage = spmb.buildOrderMessage(drink);
         assertEquals(expectedMessage, protocolMessage);
 
     }
@@ -114,11 +130,12 @@ public class SimpleProtocolMessageBuilderTest {
     @Test
     public void givenOrangeJuiceOrder_whenBuildOrderMessage_thenReturnTeaCode_extraHotCode_delimiter_twoSugar_delimiter_stickCode() {
 
-        CoolDrinkType orangeJuice = ORANGE_JUICE;
+        DrinkType drinkType = ORANGE_JUICE;
+        Drink drink = drinkFactory.createDrink(drinkType);
         String expectedMessage = String.join(SimpleProtocolMessageBuilder.DELIMITER,
-                orangeJuice.getCode(),
+                drinkType.getCode(),
                 SimpleProtocolMessageBuilder.DELIMITER);
-        String protocolMessage = spmb.buildOrderMessage(orangeJuice, ZERO, false);
+        String protocolMessage = spmb.buildOrderMessage(drink);
         assertEquals(expectedMessage, protocolMessage);
 
     }

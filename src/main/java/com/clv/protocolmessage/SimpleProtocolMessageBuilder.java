@@ -1,5 +1,6 @@
 package com.clv.protocolmessage;
 
+import com.clv.order.Drink;
 import com.clv.order.DrinkType;
 import com.clv.order.SugarQuantity;
 
@@ -14,10 +15,12 @@ public class SimpleProtocolMessageBuilder implements ProtocolMessageBuilder {
     public static final String ABSENT_CODE = "";
 
     @Override
-    public String buildOrderMessage(DrinkType drink, SugarQuantity sugarQuantity, boolean isExtraHot ) {
-        return buildMessage(buildDrinkCode(drink, isExtraHot),
-                buildSugarCode(sugarQuantity),
-                buildStickCode(sugarQuantity));
+    public String buildOrderMessage(Drink drink) {
+        return buildMessage(
+                buildDrinkCode(drink.getDrinkType(), drink.isExtraHot()),
+                buildSugarCode(drink.getSugarQuantity()),
+                buildStickCode(drink.getSugarQuantity())
+        );
     }
 
     @Override

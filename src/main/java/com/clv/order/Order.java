@@ -1,11 +1,11 @@
 package com.clv.order;
 
-public abstract class Order {
+public class Order {
 
-    protected final DrinkType drink;
-    protected final int money;
+    private final Drink drink;
+    private final int money;
 
-    public Order(DrinkType drink, int money) {
+    public Order(Drink drink, int money) {
         if(drink == null) {
             throw new IllegalArgumentException("drink cannot be null");
         }
@@ -16,7 +16,7 @@ public abstract class Order {
         this.money = money;
     }
 
-    public DrinkType getDrink() {
+    public Drink getDrink() {
         return drink;
     }
 
@@ -24,11 +24,6 @@ public abstract class Order {
         return money;
     }
 
-    public SugarQuantity getSugarQuantity() {
-        return SugarQuantity.ZERO;
-    }
+    public DrinkType getDrinkType() { return drink.getDrinkType();}
 
-    public boolean isExtraHot(){
-        return false;
-    }
 }

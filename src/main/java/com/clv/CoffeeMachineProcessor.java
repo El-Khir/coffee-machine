@@ -35,8 +35,8 @@ public class CoffeeMachineProcessor {
 
     public String processOrder(Order order) {
 
-        if(isMissingDrink(order.getDrink())){
-            notifyMissingDrink(order.getDrink());
+        if(isMissingDrink(order.getDrinkType())){
+            notifyMissingDrink(order.getDrinkType());
             return protocolMessageBuilder.buildInfoMessage(SHORTAGE_MESSAGE);
         }
 
@@ -46,16 +46,15 @@ public class CoffeeMachineProcessor {
 
         saveSoldOrder(order);
 
-        return protocolMessageBuilder.buildOrderMessage(order.getDrink(), order.getSugarQuantity(), order.isExtraHot());
+        return protocolMessageBuilder.buildOrderMessage(order.getDrink());
     }
 
-    //or void and system log report
     public Report generateReport() {
         return reportGenerator.generate(repository.getAll());
     }
 
     private boolean isMissingMoney(Order order) {
-        return order.getDrink().getPrice() > order.getMoney();
+        return order.getDrinkType().getPrice() > order.getMoney();
     }
 
     private boolean isMissingDrink(DrinkType drink) {
@@ -63,7 +62,7 @@ public class CoffeeMachineProcessor {
     }
 
     private String buildMissingMoneyMessage(Order order) {
-        int missingMoney = order.getDrink().getPrice() - order.getMoney();
+        int missingMoney = order.getDrinkType().getPrice() - order.getMoney();
         return String.format(MISSING_MONEY_MESSAGE_TEMPLATE, missingMoney);
     }
 
@@ -72,7 +71,7 @@ public class CoffeeMachineProcessor {
     }
 
     private void saveSoldOrder(Order order) {
-        repository.save(new Purchase(order.getDrink()));
+        repository.save(new Purchase(order.getDrinkType()));
     }
 
 
